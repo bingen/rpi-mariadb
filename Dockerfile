@@ -1,19 +1,15 @@
 #
 # MariaDB Dockerfile
 #
-# https://github.com/dockerfile/mariadb
+# https://github.com/bingen/rpi-mariadb
 #
 
 # Pull base image.
-FROM resin/rpi-raspbian:wheezy
+FROM resin/raspberrypi3-debian:latest
 
 # Install MariaDB.
 RUN \
   sudo apt-get update && \
-  sudo apt-get -y install wget && \
-  sudo wget -O /etc/apt/sources.list.d/repository.pi3g.com.list http://repository.pi3g.com/sources.list && \
-  wget -O - http://repository.pi3g.com/pubkey | sudo apt-key add - && \
-  sudo apt-get update && \                                                         
   sudo apt-get upgrade  && \
   apt-get -y install mariadb-server
 RUN \
@@ -22,16 +18,17 @@ RUN \
   echo "mysqladmin --silent --wait=30 ping || exit 1" >> /tmp/config && \
   echo "mysql -e 'GRANT ALL PRIVILEGES ON *.* TO \"root\"@\"%\" WITH GRANT OPTION;'" >> /tmp/config && \
   bash /tmp/config && \
-  rm -f /tmp/config
+  mysql -e "SELECT Host, User, Password FROM mysql.user;" > /tmp/a.out
+  #rm -f /tmp/config
+
+COPY startup.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/startup.sh
 
 # Define mountable directories.
-VOLUME ["/etc/mysql", "/var/lib/mysql"]
-
-# Define working directory.
-WORKDIR /data
+#VOLUME ["/var/lib/mysql"]
 
 # Define default command.
-CMD ["mysqld_safe"]
+CMD ["/usr/local/bin/startup.sh"]
 
 # Expose ports.
 EXPOSE 3306
