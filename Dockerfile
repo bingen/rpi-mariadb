@@ -7,10 +7,12 @@
 # Pull base image.
 FROM resin/raspberrypi3-debian:latest
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install MariaDB.
 RUN \
-  sudo apt-get update && \
-  sudo apt-get upgrade  && \
+  apt-get update && \
+  apt-get upgrade  && \
   apt-get -y install mariadb-server
 RUN \
   sed -i 's/^\(bind-address\s.*\)/# \1/' /etc/mysql/my.cnf && \
